@@ -1,6 +1,8 @@
 #ifndef	_P_REG_H
 #define	_P_REG_H
 
+// TODO, add base layout for pi 4
+
 // base addr for registers on RASPI2/3
 #define PBASE           0x3F000000
 #define BUSALIAS        0xC0000000

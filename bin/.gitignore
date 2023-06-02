@@ -1,0 +1,4 @@
+
+# we want to track this directory but ignore files in it
+
+*

@@ -1,3 +1,8 @@
+# ignore builds that may end up outside? of bin dir
 kernel*.img
+# security ignore vscode settings
 .vscode
+# notes on current progress
 notes
+# personal sources during
+sources

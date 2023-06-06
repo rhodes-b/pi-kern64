@@ -1,52 +1,31 @@
-// AArch32 mode
- 
-// To keep this in the first portion of the binary.
-.section ".text.boot"
- 
-// Make _start global.
-.globl _start
- 
-        .org 0x8000
-// Entry point for the kernel.
-// r15 -> should begin execution at 0x8000.
-// r0 -> 0x00000000
-// r1 -> 0x00000C42 - machine id
-// r2 -> 0x00000100 - start of ATAGS
-// preserve these registers as argument for kernel_main
+
+.section ".text.boot"  // Make sure the linker puts this at the start of the kernel image
+
+.global _start  // Execution starts here
+
 _start:
-	// Shut off extra cores
-	mrc p15, 0, r5, c0, c0, 5
-	and r5, r5, #3
-	cmp r5, #0
-	bne halt
- 
-	// Setup the stack.
-	ldr r5, =_start
-	mov sp, r5
- 
-	// Clear out bss.
-	ldr r4, =__bss_start
-	ldr r9, =__bss_end
-	mov r5, #0
-	mov r6, #0
-	mov r7, #0
-	mov r8, #0
-	b       2f
- 
-1:
-	// store multiple at r4.
-	stmia r4!, {r5-r8}
- 
-	// If we are still below bss_end, loop.
-2:
-	cmp r4, r9
-	blo 1b
- 
-	// Call kernel_main
-	ldr r3, =kernel_main
-	blx r3
- 
-	// halt
-halt:
-	wfe
-	b halt
+    // Check processor ID is zero (executing on main core), else hang
+    mrs     x1, mpidr_el1
+    and     x1, x1, #3
+    cbz     x1, 2f
+    // We're not on the main core, so hang in an infinite wait loop
+1:  wfe
+    b       1b
+2:  // We're on the main core!
+
+    // Set stack to start below our code
+    ldr     x1, =_start
+    mov     sp, x1
+
+    // Clean the BSS section
+    ldr     x1, =__bss_start     // Start address
+    ldr     w2, =__bss_size      // Size of the section
+3:  cbz     w2, 4f               // Quit loop if zero
+    str     xzr, [x1], #8
+    sub     w2, w2, #1
+    cbnz    w2, 3b               // Loop if non-zero
+
+    // Jump to our main() routine in C (make sure it doesn't return)
+4:  bl      kernel_main
+    // In case it does return, halt the master core too
+    b       1b

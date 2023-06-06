@@ -1,23 +1,28 @@
-ARMGNU ?= arm-none-eabi
-# 32 bit compiler
+# this is 64 bit compiler
+ARMGNU ?= aarch64-linux-gnu
 
-COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only -mcpu=cortex-a7
-ASMOPS = -Iinclude -mcpu=cortex-a7 
+CPU = -mcpu=cortex-a53
+COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only $(CPU)
+ASMOPS = -Iinclude $(CPU)
+
+LIBGCC = /usr/lib/gcc-cross/aarch64-linux-gnu/11/
+LIBPATH = /usr/aarch64-linux-gnu/lib
+
 
 BUILD_DIR = bin
 SRC_DIR = src
 
-all : kernel7.img
+all : kernel8.img
 
 clean :
-	rm -rf $(BUILD_DIR) *.img 
+	rm -rf $(BUILD_DIR)/*
 
 $(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c
 	mkdir -p $(@D)
-	$(ARMGNU)-gcc $(COPS) -mcpu=cortex-a7 -c $< -o $@
+	$(ARMGNU)-gcc $(COPS) -c $< -o $@
 
 $(BUILD_DIR)/%_s.o: $(SRC_DIR)/%.S
-	$(ARMGNU)-gcc $(ASMOPS) -mcpu=cortex-a7 -c $< -o $@
+	$(ARMGNU)-gcc $(ASMOPS) -c $< -o $@
 
 C_FILES = $(wildcard $(SRC_DIR)/*.c)
 ASM_FILES = $(wildcard $(SRC_DIR)/*.S)
@@ -27,6 +32,6 @@ OBJ_FILES += $(ASM_FILES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%_s.o)
 DEP_FILES = $(OBJ_FILES:%.o=%.d)
 -include $(DEP_FILES)
 
-kernel7.img: $(SRC_DIR)/linker.ld $(OBJ_FILES)
-	$(ARMGNU)-ld -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel7.elf  $(OBJ_FILES)
-	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel7.elf -O binary kernel7.img
+kernel8.img: $(SRC_DIR)/linker.ld $(OBJ_FILES)
+	$(ARMGNU)-ld -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf  $(OBJ_FILES)
+	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel8.elf -O binary kernel8.img

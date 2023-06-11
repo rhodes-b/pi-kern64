@@ -1,5 +1,7 @@
 # this is 64 bit compiler
 ARMGNU ?= aarch64-linux-gnu
+# ARMGNU ?= aarch64-none-elf
+# (note this compiler also worked currently but uses the others libraries for libmath --only Hello Kernel--)
 
 CPU = -mcpu=cortex-a53
 COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only $(CPU)

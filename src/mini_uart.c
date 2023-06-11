@@ -33,8 +33,7 @@ void uart_send_string(char* str) {
 
 void uart_init ( void )
 {
-	u32 selector;
-
+	u64 selector;
 	selector = get64(GPIO_FSEL1);
 	selector &= ~(7<<12);                   // clean gpio14
 	selector |= 2<<12;                      // set alt5 for gpio14
